@@ -39,7 +39,23 @@ Docker is required to run MongoDB locally.
 Follow the official instructions for your OS:  
 - [Get Docker](https://docs.docker.com/get-docker/)
 
-After installing Docker, you can start a MongoDB container with:
+## Run Docker Compose Services
+
+```bash
+$ cd docker
+$ cp .env.example .env
+```
+
+- update `.env` with your credentials
+
+
+
+```bash
+$ cd docker
+$ sudo docker compose up -d
+```
+
+You can start a MongoDB container with:
 
 ```bash
 $ docker run -d -p 27007:27017 --name mongodb mongo:7-jammy
