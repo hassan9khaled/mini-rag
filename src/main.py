@@ -10,14 +10,14 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     
     # Initialize MongoDB connection
-    app.mongo_conn = AsyncIOMotorClient(settings.MONGODB_URL)
-    app.db_client = app.mongo_conn[settings.MONGODB_DATABASE]
+    app.state.mongo_conn = AsyncIOMotorClient(settings.MONGODB_URL)
+    app.state.db_client = app.state.mongo_conn[settings.MONGODB_DATABASE]
     print("Connected to MongoDB!")
     
     yield  # This separates startup from shutdown code
     
     # Shutdown code
-    app.mongo_conn.close()
+    app.state.mongo_conn.close()
     print("Closed MongoDB connection!")
 
 app = FastAPI(lifespan=lifespan)
