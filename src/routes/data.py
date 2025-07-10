@@ -24,7 +24,7 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
                       app_settings: Settings = Depends(get_settings)):
     
 
-    project_model = ProjectModel(
+    project_model = await ProjectModel.create_instance(
         db_client=request.app.state.db_client
     )
 
@@ -82,7 +82,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
     overlab_size = process_request.overlab_size
     do_reset = process_request.do_reset
 
-    project_model = ProjectModel(
+    project_model = await ProjectModel.create_instance(
         db_client=request.app.state.db_client
     )
 
@@ -120,7 +120,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
     ]
 
 
-    chunk_model = ChunkModel(
+    chunk_model = await ChunkModel.create_instance(
         db_client=request.app.state.db_client
     )
 
