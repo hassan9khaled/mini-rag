@@ -1,22 +1,27 @@
 from fastapi import FastAPI
-from routes import base, data
+from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
+from routes import base, data
 
-app = FastAPI()
-
-@app.on_event('startup')
-async def startup_db_client():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup code
     settings = get_settings()
     
-    app.mongo_conn = AsyncIOMotorClient( settings.MONGODB_URL )
-    app.db_client =  app.mongo_conn[settings.MONGODB_DATABASE]
-
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
+    # Initialize MongoDB connection
+    app.mongo_conn = AsyncIOMotorClient(settings.MONGODB_URL)
+    app.db_client = app.mongo_conn[settings.MONGODB_DATABASE]
+    print("Connected to MongoDB!")
+    
+    yield  # This separates startup from shutdown code
+    
+    # Shutdown code
     app.mongo_conn.close()
+    print("Closed MongoDB connection!")
 
+app = FastAPI(lifespan=lifespan)
 
+# Include your routers
 app.include_router(base.base_router)
 app.include_router(data.data_router)
