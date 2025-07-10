@@ -33,31 +33,11 @@ export PS1="\[\033[01;32m\]\u@\h:\w\n\[\033[00m\]\$ "
 $ pip install -r requirements.txt
 ```
 
-### Install Docker
-
-Docker is required to run MongoDB locally.  
-Follow the official instructions for your OS:  
-- [Get Docker](https://docs.docker.com/get-docker/)
-
-After installing Docker, you can start a MongoDB container with:
+### Setup the environment variables
 
 ```bash
-$ docker run -d -p 27007:27017 --name mongodb mongo:7-jammy
+$ cp .env.example .env
 ```
-
-This will run MongoDB on `localhost:27007`.
-
-### (Optional) Install Studio 3T
-
-[Studio 3T](https://studio3t.com/download/) is a GUI client for MongoDB, making it easier to view and manage your database.
-
-1. Download Studio 3T from [here](https://studio3t.com/download/).
-2. Install and launch the application.
-3. Connect to your local MongoDB instance using:
-   - Host: `localhost`
-   - Port: `27007`
-
----
 
 Set your environment variables in the .env file. Like `OPENAI_API_KEY` value.
 
@@ -66,3 +46,7 @@ Set your environment variables in the .env file. Like `OPENAI_API_KEY` value.
 ```bash
 $ uvicorn main:app --reload --host 0.0.0.0 --port 5000
 ```
+
+## POSTMAN Collection
+
+Download the POSTMAN collection from [/assets/mini-rag-app.postman_collection.json](/assets/mini-rag-app.postman_collection.json])
