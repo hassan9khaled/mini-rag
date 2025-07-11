@@ -35,7 +35,7 @@ class ChunkModel(BaseDataModel):
 
     async def create_chunk(self, chunk: Data_Chunk):
         result = await self.collection.insert_one(chunk.model_dump(by_alias=True, exclude_unset=True))
-        chunk._id = result.inserted_id
+        chunk.id = result.inserted_id
 
         return chunk
     
