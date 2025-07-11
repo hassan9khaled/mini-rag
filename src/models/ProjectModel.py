@@ -4,6 +4,8 @@ from .enums.DataBaseEnum import DataBaseEnum
 from typing import Any, Mapping
 
 class ProjectModel(BaseDataModel):
+
+    """Model for managing project-related database operations."""
     
     def __init__(self, db_client: Mapping[str, Any]):
         super().__init__(db_client=db_client)

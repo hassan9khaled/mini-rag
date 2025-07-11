@@ -12,6 +12,8 @@ from models.ChunkModel import ChunkModel
 from models.AssetModel import AssetModel
 from models.db_schemes import Data_Chunk, Asset
 from models.enums.AssetModelEnum import AssetModelEnum
+from datetime import datetime, timezone
+
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -77,7 +79,8 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
         asset_project_id=project.id,
         asset_type=AssetModelEnum.FILE.value,
         asset_name=file_id,
-        asset_size=os.path.getsize(file_path)
+        asset_size=os.path.getsize(file_path),
+        created_at = datetime.now(timezone.utc)
     ) # type: ignore
 
     asset_record = await asset_model.create_asset(asset=asset_resource)

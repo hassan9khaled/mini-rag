@@ -6,12 +6,13 @@ import re
 import os
 
 class DataController(BaseController):
-    
+    """Controller for handling data-related operations, such as file uploads and validations."""
     def __init__(self):
         super().__init__()
         self.size_scale = 1048576
         
     def validate_uploaded_file(self, file: UploadFile):
+        """Validates the uploaded file based on its type and size."""
 
         if file.content_type not in self.app_settings.FILE_ALLOWED_TYPES:
             return False, ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value
@@ -27,7 +28,9 @@ class DataController(BaseController):
         return True, ResponseSignal.FILE_UPLOADED_SUCCESS.value  # Return True if all checks pass
     
     def generate_unique_filepath(self, original_file_name, project_id: str):
+        """Generates a unique file path for the uploaded file."""
 
+        # Generate a random key to ensure uniqueness
         random_key = self.generate_random_string()
         project_path = ProjectController().get_project_path(project_id=project_id)
         cleaned_file_name = self.get_clean_file_name(original_file_name=original_file_name)
@@ -36,7 +39,7 @@ class DataController(BaseController):
             project_path,
             random_key + "_" + cleaned_file_name
         )
-
+        # Ensure the file path is unique
         while os.path.exists(new_file_path):
             random_key = self.generate_random_string()
             new_file_path = os.path.join(
@@ -48,6 +51,7 @@ class DataController(BaseController):
     
     
     def get_clean_file_name(self, original_file_name: str):
+        """Cleans the original file name by removing special characters and replacing spaces with underscores."""
         # remove any special characters, except underscore and .
         cleaned_file_name = re.sub(r'[^\w.]', '', original_file_name.strip())
 

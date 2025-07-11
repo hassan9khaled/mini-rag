@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict # type: ignore
 
 class Settings(BaseSettings):
 
+    """Application settings loaded from environment variables."""
+    
     APP_NAME: str
     APP_VERSION: str
     OPENAI_API_KEY: str

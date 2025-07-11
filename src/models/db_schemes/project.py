@@ -4,6 +4,9 @@ from bson.objectid import ObjectId
 
 
 class Project(BaseModel):
+    
+    """Project Scheme representing a project in the application."""
+
     id: Optional[ObjectId] = Field(None, alias="_id")
     project_id: str = Field(..., min_length=1)
 
