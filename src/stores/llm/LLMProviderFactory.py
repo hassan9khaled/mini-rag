@@ -6,7 +6,7 @@ class LLMProviderFactory:
         self.config = config
 
     def create(self, provider: str):
-        if provider == LLMEnums.OPENAI.value or provider == LLMEnums.OLLAMA.value:
+        if provider == LLMEnums.OPENAI.value or provider == LLMEnums.OLLAMA.name:
             return OpenAIProvider(
                 api_key=self.config.OPENAI_API_KEY,
                 base_url=self.config.OPENAI_API_URL,
