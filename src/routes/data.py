@@ -6,7 +6,7 @@ from controllers import DataController, ProjectController, ProcessController
 from models import ResponseSignal
 import aiofiles 
 import logging
-from .schemes.data import ProcessRequest, ChunksRequest
+from .schemes.data import ProcessRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
 from models.AssetModel import AssetModel
