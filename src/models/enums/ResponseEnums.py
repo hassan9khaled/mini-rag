@@ -11,4 +11,6 @@ class ResponseSignal(Enum):
     PROCESSING_FAILED = "processing_failed"
     NO_FILES_ERROR = "files_not_found"
     FILE_ID_ERROR = "no_file_found_with_this_id"
+    CHUNKS_RETRIEVED_SUCCESS = "chunks_retrieved_successfully"
+    CHUNKS_RETRIEVED_FAILED = "chunks_retrieved_failed"
     
