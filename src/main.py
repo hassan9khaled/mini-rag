@@ -2,8 +2,9 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
-from routes import base, data
+from routes import base, data, nlp
 from stores.llm.LLMProviderFactory import LLMProviderFactory
+from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
 
 
 @asynccontextmanager
@@ -32,14 +33,29 @@ async def lifespan(app: FastAPI):
 
     print(f"\x1b[36m{settings.EMBEDDING_BACKEND} Embedding Model loaded successfully!\033[0m")
 
+    # Setup the VectorDBFactory
+    vectordb_provider_factory = VectorDBProviderFactory(settings)
+
+    # VectorDB Client
+    app.state.vectordb_client = vectordb_provider_factory.create(
+        provider=settings.VECTOR_DB_BACKEND
+    )
+
+    app.state.vectordb_client.connect()
+    print(f"\x1b[36mConnected to {settings.VECTOR_DB_BACKEND.capitalize()}DB!\033[0m")
+
     yield  # This separates startup from shutdown code
     
     # Shutdown code
     app.state.mongo_conn.close()
     print("\x1b[33mClosed MongoDB connection!\033[0m")
 
+    app.state.vectordb_client.disconnect()
+    print(f"\x1b[33mClosed {settings.VECTOR_DB_BACKEND.capitalize()}DB connection!\033[0m")
+
 app = FastAPI(lifespan=lifespan)
 
 # Include your routers
 app.include_router(base.base_router)
 app.include_router(data.data_router)
+app.include_router(nlp.data_router)
