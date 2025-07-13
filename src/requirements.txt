@@ -13,3 +13,4 @@ PyMongo >=4.9
 openai==1.55.3 
 ollama==0.5.1
 cohere==5.5.4
+qdrant-client==1.12.1
