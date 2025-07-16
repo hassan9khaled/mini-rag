@@ -77,6 +77,37 @@ This will run MongoDB on `localhost:27007`.
 
 Set your environment variables in the .env file. Like `OPENAI_API_KEY` value.
 
+## Steps to Run Ollama Server Locally on WSL Ubuntu
+
+1. Set the `OLLAMA_HOST` environment variable
+   - Windows 11: Settings > System > About > Advanced system settings > Environment Variables
+
+   - Under System Variables, click New or Edit and add:
+   Variable name: `OLLAMA_HOST`
+   Variable value: `0.0.0.0:11434` 
+
+2. Run the Ollama server 
+```bash
+$ ollama serve
+```
+
+3. Find the Windows Host IP for WSL
+- In a Windows Command Prompt, run:
+   ```bash
+   ipconfig
+   ```
+
+   Look for the IPv4 address under your active network adapter (e.g., 192.168.1.10 under "Ethernet adapter" or "WSL").
+
+4. Test Connectivity from WSL
+- In your WSL Ubuntu terminal, test the connection:
+   ```bash
+   curl http://<windows-host-ip>:11434
+   ```
+   Replace <windows-host-ip> with the IP from Step 3 (e.g., http://192.168.1.10:11434). You should see "Ollama is running".
+* **Note: You will use this ip address("http://`windows-host-ip:11434`") in the base_url to access ollama**  
+
+
 ## Run the FastAPI server
 
 ```bash
