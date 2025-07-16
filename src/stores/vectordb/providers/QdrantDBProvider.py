@@ -54,6 +54,7 @@ class QdrantDBProvider(VectorDBInterface):
                 collection_name=collection_name,
                 records=[
                     models.Record(
+                        id = [record_id],
                         vector=vector,
                         payload={'text': text, 'metadata': metadata}
                     )
@@ -82,9 +83,11 @@ class QdrantDBProvider(VectorDBInterface):
             batch_texts = texts[i:batch_end]
             batch_metadata = metadata[i:batch_end]
             batch_vectors = vectors[i:batch_end]
+            batch_record_ids =  record_ids[i:batch_end]
 
             batch_records = [
                 models.Record(
+                    id = batch_record_ids[rec],
                     vector=batch_vectors[rec],
                     payload={"text": batch_texts[rec], "metadata": batch_metadata[rec]}
                 )
@@ -105,14 +108,14 @@ class QdrantDBProvider(VectorDBInterface):
 
     def delete_collection(self, collection_name):
         if self.is_collection_exists(collection_name=collection_name):
-            return self.delete_collection(collection_name=collection_name)
+            return self.client.delete_collection(collection_name=collection_name)
         
     def create_collection(self, collection_name, embedding_size, do_reset = False):
 
         if do_reset:
             _ = self.delete_collection(collection_name=collection_name)
         
-        if self.is_collection_exists(collection_name=collection_name):
+        if not self.is_collection_exists(collection_name=collection_name):
             _ = self.client.create_collection(
                     collection_name=collection_name,
                     vectors_config=models.VectorParams(
