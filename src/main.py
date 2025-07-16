@@ -58,4 +58,4 @@ app = FastAPI(lifespan=lifespan)
 # Include your routers
 app.include_router(base.base_router)
 app.include_router(data.data_router)
-app.include_router(nlp.data_router)
+app.include_router(nlp.nlp_router)
