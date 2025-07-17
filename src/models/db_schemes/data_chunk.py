@@ -31,3 +31,10 @@ class Data_Chunk(BaseModel):
                 "unique": False # usually the chunks has the same project_id
             }
         ]
+    
+class RetrievedDocument(BaseModel):
+    id: int
+    text: str
+    score: float
+    source: str
+    page: Optional[int] = None

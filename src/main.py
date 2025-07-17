@@ -5,6 +5,7 @@ from helpers.config import get_settings
 from routes import base, data, nlp
 from stores.llm.LLMProviderFactory import LLMProviderFactory
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
+from stores.llm.templates.template_parser import TemplateParser
 
 
 @asynccontextmanager
@@ -44,6 +45,11 @@ async def lifespan(app: FastAPI):
     app.state.vectordb_client.connect()
     print(f"\x1b[36mConnected to {settings.VECTOR_DB_BACKEND.capitalize()}DB!\033[0m")
 
+    app.state.template_parser = TemplateParser(
+        language=settings.PRIMARY_LANG,
+        default_language=settings.DEFAULT_LANG
+    )
+    
     yield  # This separates startup from shutdown code
     
     # Shutdown code
