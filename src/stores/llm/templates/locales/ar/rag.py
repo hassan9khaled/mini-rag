@@ -15,6 +15,12 @@ system_prompt = Template("\n".join([
     "كن دقيقًا ومختصرًا في ردك. تجنب المعلومات غير الضرورية.",
 ]))
 
+#### User Query ####
+
+user_query = Template(
+    "باستخدام المستندات المرفقة, $query:"
+)
+
 #### Document ####
 document_prompt = Template(
     "\n".join([

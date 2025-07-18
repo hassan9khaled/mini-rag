@@ -205,3 +205,29 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
             "processed_files": num_files
         }
     )
+
+@data_router.get("/projects/info")
+async def list_all_projects(request: Request):
+    # Get or create the project
+    project_model = await ProjectModel.create_instance(
+        db_client=request.app.state.db_client
+    )
+
+    projects, pages = await project_model.get_all_projects()
+
+    if not projects:
+
+        return JSONResponse(
+            content={
+                "signal": ResponseSignal.NO_PROJECTS_FOUND.value,
+                "projects": []
+            }
+        )
+
+    return JSONResponse(
+        content={
+            "signal": ResponseSignal.PROCESS_SUCCESS.value,
+            "projects": projects,
+            "pages": pages
+        }
+    )

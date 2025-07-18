@@ -106,7 +106,6 @@ class NLPController(BaseController):
     def answer_rag_question(self, project: Project, query: str, limit: int = 5):
 
         if "qwen" in self.settings.GENERATION_MODEL_ID:
-            print(self.settings.GENERATION_MODEL_ID)
             query = "/no_think" + query
 
         answer, full_prompt, chat_history = None, None, None
