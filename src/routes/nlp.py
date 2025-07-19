@@ -94,7 +94,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
     )
 
 @nlp_router.get("/index/info/{project_id}")
-async def index_project(request: Request, project_id: str):
+async def info_project(request: Request, project_id: str):
    
     project_model = await ProjectModel.create_instance(
         db_client=request.app.state.db_client

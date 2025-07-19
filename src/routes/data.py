@@ -25,7 +25,7 @@ data_router = APIRouter(
 
 @data_router.post("/upload/{project_id}")
 async def upload_data(request: Request, project_id: str, file: UploadFile,
-                      app_settings: Settings = Depends(get_settings)):
+                       app_settings: Settings = Depends(get_settings)):
     """
     Uploads a file to a specific project.
 
@@ -46,6 +46,7 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
     project_model = await ProjectModel.create_instance(
         db_client=request.app.state.db_client
     )
+
     project = await project_model.get_project_or_create_one(
         project_id=project_id
     )
@@ -173,7 +174,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
             logger.error(f"Error while processing file: {file_id}")
             continue
 
-        file_chunks = process_controller.process_file_content(
+        file_chunks, records_signal = process_controller.process_file_content(
             file_content=file_content,
             file_id=file_id,
             chunk_size=chunk_size,
@@ -200,7 +201,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
 
     return JSONResponse(
         content={
-            "signal": ResponseSignal.PROCESSING_SUCCESS.value,
+            "signal": ResponseSignal.PROCESSING_SUCCESS.value if not records_signal else ResponseSignal.RECORDS_EXCEEDED.value,
             "inserted_chunks": num_records,
             "processed_files": num_files
         }

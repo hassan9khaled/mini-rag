@@ -24,4 +24,5 @@ class ResponseSignal(Enum):
     PROCESS_SUCCESS = "process_success"
     PROCESS_FAILED = "process_failed"
     NO_PROJECTS_FOUND = "no_projects_found"
+    RECORDS_EXCEEDED = "you_csv_file_exceed_the_records_limit"
     

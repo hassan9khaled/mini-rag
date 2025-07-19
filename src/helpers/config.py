@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     DEFAULT_LANG: str = "en"
     PRIMARY_LANG: str = "en"
 
+    CSV_FILE_MAX_RECORDS: int = 1000
+
     class Config:
         env_file = ".env"
 
