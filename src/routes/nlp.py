@@ -15,8 +15,8 @@ nlp_router = APIRouter(
     tags=["api_v1", "nlp"]
 )
 
-@nlp_router.post("/index/push/{project_id}")
-async def index_project(request: Request, project_id: str, push_request: PushRequest):
+@nlp_router.post("/index/push/{project_name}")
+async def index_project(request: Request, project_name: str, push_request: PushRequest):
     
     # Get or create the project
     project_model = await ProjectModel.create_instance(
@@ -28,7 +28,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
     )
 
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_name=project_name
     )
 
     if not project:
@@ -93,14 +93,14 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
         }
     )
 
-@nlp_router.get("/index/info/{project_id}")
-async def info_project(request: Request, project_id: str):
+@nlp_router.get("/index/info/{project_name}")
+async def info_project(request: Request, project_name: str):
    
     project_model = await ProjectModel.create_instance(
         db_client=request.app.state.db_client
     )
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_name=project_name
     )
     nlp_controller = NLPController(
         vectordb_client=request.app.state.vectordb_client,
@@ -118,8 +118,8 @@ async def info_project(request: Request, project_id: str):
         }
     )
 
-@nlp_router.post("/index/search/{project_id}")
-async def search_index(request: Request, project_id: str, search_request: SearchRequest):
+@nlp_router.post("/index/search/{project_name}")
+async def search_index(request: Request, project_name: str, search_request: SearchRequest):
 
    
     project_model = await ProjectModel.create_instance(
@@ -127,7 +127,7 @@ async def search_index(request: Request, project_id: str, search_request: Search
     )
 
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_name=project_name
     )
 
     nlp_controller = NLPController(
@@ -159,8 +159,8 @@ async def search_index(request: Request, project_id: str, search_request: Search
         }
     )
 
-@nlp_router.post("/index/answer/{project_id}")
-async def answer_rag(request: Request, project_id: str, search_request: SearchRequest):
+@nlp_router.post("/index/answer/{project_name}")
+async def answer_rag(request: Request, project_name: str, search_request: SearchRequest):
 
    
     project_model = await ProjectModel.create_instance(
@@ -168,7 +168,7 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
     )
 
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_name=project_name
     )
 
     nlp_controller = NLPController(

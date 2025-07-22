@@ -8,12 +8,12 @@ class Project(BaseModel):
     """Project Scheme representing a project in the application."""
 
     id: Optional[ObjectId] = Field(None, alias="_id")
-    project_id: str = Field(..., min_length=1)
+    project_name: str = Field(..., min_length=1)
 
-    @field_validator('project_id')
-    def validate_project_id(cls, value):
+    @field_validator('project_name')
+    def validate_project_name(cls, value):
         if not value.isalnum():
-            raise ValueError("project_id must be alphanumeric")
+            raise ValueError("project_name must be alphanumeric")
         
         return value
     
@@ -26,9 +26,9 @@ class Project(BaseModel):
         return [
             {
                 "key": [
-                    ("project_id", 1)
+                    ("project_name", 1)
                 ],
-                "name": "project_id_index_1",
+                "name": "project_name_index_1",
                 "unique": True
             }
         ]

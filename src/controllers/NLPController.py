@@ -19,17 +19,17 @@ class NLPController(BaseController):
 
         self.settings = get_settings()
 
-    def create_collection_name(self, project_id: str):
-        return f"collection_{project_id}".strip()
+    def create_collection_name(self, project_name: str):
+        return f"collection_{project_name}".strip()
 
     def reset_vector_db_collection(self, project: Project):
 
-        collection_name = self.create_collection_name(project_id=project.project_id)
+        collection_name = self.create_collection_name(project_name=project.project_name)
 
         return self.vectordb_client.delete_collection(collection_name=collection_name)
     
     def get_vector_db_collection_info(self, project: Project):
-        collection_name = self.create_collection_name(project_id=project.project_id)
+        collection_name = self.create_collection_name(project_name=project.project_name)
         collection_info = self.vectordb_client.get_collection_info(collection_name=collection_name)
 
         return json.loads(
@@ -41,7 +41,7 @@ class NLPController(BaseController):
                              do_reset: bool = False):
         
         # Step 1: create collection name
-        collection_name = self.create_collection_name(project_id = project.project_id)
+        collection_name = self.create_collection_name(project_name = project.project_name)
 
         # Step 2: manage the items
         texts = [c.chunk_text for c in chunks]
@@ -76,7 +76,7 @@ class NLPController(BaseController):
     def search_vector_db_collection(self, project: Project, text: str, limit: int = 5):
         
         # step 1: get the collection name
-        collection_name = self.create_collection_name(project_id = project.project_id)
+        collection_name = self.create_collection_name(project_name = project.project_name)
 
         # step 2: get text embedding vector
         vector = self.embedding_client.embed_text(

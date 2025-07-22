@@ -16,11 +16,11 @@ import csv
 
 class ProcessController(BaseController):
     """Controller for processing files in a project, including loading and splitting file content."""
-    def __init__(self, project_id: str):
+    def __init__(self, project_name: str):
         super().__init__()
 
-        self.project_id = project_id
-        self.project_path = ProjectController().get_project_path(project_id)
+        self.project_name = project_name
+        self.project_path = ProjectController().get_project_path(project_name)
         self.csv_flag = False
         self.max_records_exceeded = False
         self.csv_file_max_records = get_settings().CSV_FILE_MAX_RECORDS
@@ -78,6 +78,7 @@ class ProcessController(BaseController):
         documents = []
 
         with open(file_path, mode="r", encoding="utf-8") as csv_file:
+
             reader = csv.DictReader(csv_file)
             header = next(reader)  # Read header for reference
             
@@ -151,7 +152,7 @@ class ProcessController(BaseController):
             for rec in file_content
         ]
 
-        print(file_content_metadata[-1]["row"])
+        
 
         chunks = text_splitter.create_documents(
             file_content_texts,

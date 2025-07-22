@@ -6,7 +6,7 @@ from controllers import DataController, ProjectController, ProcessController
 from models import ResponseSignal
 import aiofiles 
 import logging
-from .schemes.data import ProcessRequest
+from .schemes.data import ProcessRequest, ProjectRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
 from models.AssetModel import AssetModel
@@ -23,8 +23,29 @@ data_router = APIRouter(
     tags = ["api_v1", "data"],
 )
 
-@data_router.post("/upload/{project_id}")
-async def upload_data(request: Request, project_id: str, file: UploadFile,
+
+
+@data_router.post("/project/create/{project_name}")
+async def create_project(request: Request, project_name: str):
+
+    # Get or create the project
+    project_model = await ProjectModel.create_instance(
+        db_client=request.app.state.db_client
+    )
+
+    project = await project_model.get_project_or_create_one(
+        project_name=project_name
+    )
+
+    if project:
+        return JSONResponse(
+            content={
+                "signal": ResponseSignal.PROCESS_SUCCESS.value
+            }
+        )
+
+@data_router.post("/upload/{project_name}")
+async def upload_data(request: Request, project_name: str, file: UploadFile,
                        app_settings: Settings = Depends(get_settings)):
     """
     Uploads a file to a specific project.
@@ -33,7 +54,7 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
 
     Args:
         request (Request): The incoming request object.
-        project_id (str): The ID of the project to upload the file to.
+        project_name (str): The ID of the project to upload the file to.
         file (UploadFile): The file to be uploaded.
         app_settings (Settings, optional): Application settings. 
                                            Defaults to Depends(get_settings).
@@ -48,7 +69,7 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
     )
 
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_name=project_name
     )
 
     # Validate the uploaded file
@@ -63,7 +84,7 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
     # Generate a unique file path
     file_path, file_id = data_controller.generate_unique_filepath(
         original_file_name=file.filename,
-        project_id=project_id
+        project_name=project_name
     )
 
     # Save the file to the server
@@ -71,6 +92,7 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
         async with aiofiles.open(file_path, 'wb') as f:
             while chunk := await file.read(app_settings.FILE_DEFAULT_CHUNK_SIZE):
                 await f.write(chunk)
+                
     except Exception as e:
         logger.error(f"Error while uploading file: {e}")
         return JSONResponse(
@@ -83,7 +105,7 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
         db_client=request.app.state.db_client
     )
     asset_resource = Asset(
-        asset_project_id=project.id,
+        asset_project_name=project.id,
         asset_type=AssetModelEnum.FILE.value,
         asset_name=file_id,
         asset_size=os.path.getsize(file_path),
@@ -99,8 +121,8 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
         }
     )
 
-@data_router.post("/process/{project_id}")
-async def process(request: Request, project_id: str, process_request: ProcessRequest):
+@data_router.post("/process/{project_name}")
+async def process(request: Request, project_name: str, process_request: ProcessRequest):
     """
     Processes files in a project, creating text chunks.
 
@@ -108,7 +130,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
 
     Args:
         request (Request): The incoming request object.
-        project_id (str): The ID of the project to process.
+        project_name (str): The ID of the project to process.
         process_request (ProcessRequest): The processing parameters.
 
     Returns:
@@ -125,7 +147,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
         db_client=request.app.state.db_client
     )
     project = await project_model.get_project_or_create_one(
-        project_id=project_id
+        project_name=project_name
     )
 
     # Get the files to process
@@ -135,7 +157,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
     project_files_ids = {}
     if process_request.file_id:
         asset_record = await asset_model.get_asset_record(
-            asset_project_id=project.id,
+            asset_project_name=project.id,
             asset_name=process_request.file_id
         )
         if asset_record is None:
@@ -146,7 +168,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
         project_files_ids = {asset_record.id: asset_record.asset_name}
     else:
         project_files = await asset_model.get_all_project_assets(
-            asset_project_id=project.id,
+            asset_project_name=project.id,
             asset_type=AssetModelEnum.FILE.value,
         )
         project_files_ids = {record.id: record.asset_name for record in project_files}
@@ -158,7 +180,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
         )
 
     # Process the files
-    process_controller = ProcessController(project_id=project_id)
+    process_controller = ProcessController(project_name=project_name)
     num_records = 0
     num_files = 0
     chunk_model = await ChunkModel.create_instance(
@@ -166,7 +188,7 @@ async def process(request: Request, project_id: str, process_request: ProcessReq
     )
 
     if do_reset == 1:
-        await chunk_model.delete_chunks_by_project_id(project_id=project.id)
+        await chunk_model.delete_chunks_by_project_name(project_id=project.id)
 
     for asset_id, file_id in project_files_ids.items():
         file_content = process_controller.get_file_content(file_id=file_id)
@@ -232,3 +254,55 @@ async def list_all_projects(request: Request):
             "pages": pages
         }
     )
+
+@data_router.delete("/projects/delete")
+async def delete_project(request: Request, project_request: ProjectRequest):
+    
+    # Get or create the project
+    project_model = await ProjectModel.create_instance(
+        db_client=request.app.state.db_client
+    )
+    chunk_model = await ChunkModel.create_instance(
+        db_client=request.app.state.db_client
+    )
+
+    project = await project_model.get_project(
+        project_name=project_request.project_name
+    )    
+
+    asset_model = await AssetModel.create_instance(
+        db_client=request.app.state.db_client
+    )
+
+    if project:
+
+        request.app.state.vectordb_client.delete_collection(f"collection_{project_request.project_name}")
+
+        await asset_model.delete_assets_by_project_name(project.id)
+        await chunk_model.delete_chunks_by_project_name(project.id)
+
+        _ = ProjectController().delete_project(project_name=project_request.project_name)
+        await project_model.delete_project(project_name=project_request.project_name)
+
+
+        return JSONResponse(
+            content={
+                "signal": f"{project_request.project_name} project deleted successfully"
+            }
+        )
+        
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={
+            "signal": ResponseSignal.PROJECT_NOT_FOUND_ERROR.value
+        }
+    )
+
+@data_router.get("/projects/rename")
+async def list_all_projects(request: Request, project_request: ProjectRequest):
+    # Get or create the project
+    project_model = await ProjectModel.create_instance(
+        db_client=request.app.state.db_client
+    )
+
+    

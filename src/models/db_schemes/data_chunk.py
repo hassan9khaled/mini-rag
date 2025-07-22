@@ -28,7 +28,7 @@ class Data_Chunk(BaseModel):
                     ("chunk_project_id", 1)
                 ],
                 "name": "chunk_project_id_inedx_1",
-                "unique": False # usually the chunks has the same project_id
+                "unique": False # usually the chunks has the same project_name
             }
         ]
     

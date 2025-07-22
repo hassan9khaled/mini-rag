@@ -27,12 +27,12 @@ class DataController(BaseController):
 
         return True, ResponseSignal.FILE_UPLOADED_SUCCESS.value  # Return True if all checks pass
     
-    def generate_unique_filepath(self, original_file_name, project_id: str):
+    def generate_unique_filepath(self, original_file_name, project_name: str):
         """Generates a unique file path for the uploaded file."""
 
         # Generate a random key to ensure uniqueness
         random_key = self.generate_random_string()
-        project_path = ProjectController().get_project_path(project_id=project_id)
+        project_path = ProjectController().get_project_path(project_name=project_name)
         cleaned_file_name = self.get_clean_file_name(original_file_name=original_file_name)
         
         new_file_path = os.path.join(

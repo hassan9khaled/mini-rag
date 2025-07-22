@@ -13,7 +13,7 @@ system_prompt = Template("\n".join([
     "You have to generate response in the same language as the user's query.",
     "Be polite and respectful to the user.",
     "Be precise and concise in your response. Avoid unnecessary information.",
-    
+    "Don't Mention that you have used the documents and don't give refrence for them"
 ]))
 
 #### User Query ####
