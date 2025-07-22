@@ -6,7 +6,14 @@ from routes import base, data, nlp
 from stores.llm.LLMProviderFactory import LLMProviderFactory
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
 from stores.llm.templates.template_parser import TemplateParser
-
+from fastapi.middleware.cors import CORSMiddleware
+origins = [
+    "http://localhost",
+    "http://localhost:8080", # Example if your frontend runs on 8080
+    "http://localhost:5173", # Your frontend's development server
+    "https://your-production-frontend-domain.com", # Replace with your actual frontend domain in production
+    # Add any other origins that need to access your API
+]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -60,6 +67,14 @@ async def lifespan(app: FastAPI):
     print(f"\x1b[33mClosed {settings.VECTOR_DB_BACKEND.capitalize()}DB connection!\033[0m")
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, # Allows specific origins
+    allow_credentials=True, # Allows cookies to be included in cross-origin requests
+    allow_methods=["*"],    # Allows all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],    # Allows all headers in the request
+)
 
 # Include your routers
 app.include_router(base.base_router)
