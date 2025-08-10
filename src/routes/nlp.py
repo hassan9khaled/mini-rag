@@ -4,7 +4,10 @@ from routes.schemes.nlp import PushRequest, SearchRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
 from controllers import NLPController
+from controllers import AgentController
 from models import ResponseSignal
+from models.AssetModel import AssetModel
+from controllers import DataController
 
 import logging
 
@@ -45,6 +48,13 @@ async def index_project(request: Request, project_name: str, push_request: PushR
         generation_client=request.app.state.generation_client,
         template_parser = request.app.state.template_parser
     )
+    # Create an asset record in the database
+    asset_model = await AssetModel.create_instance(
+        db_client=request.app.state.db_client
+    )
+
+    asset_record = await asset_model.get_asset_record(asset_project_id=project.id, asset_name=push_request.asset_name)
+    asset_id = asset_record.id
 
     project_has_records = True
     page_num = 1
@@ -53,7 +63,7 @@ async def index_project(request: Request, project_name: str, push_request: PushR
 
     while project_has_records:
 
-        page_chunks = await chunk_model.get_project_chunks(project_id=project.id, page_num=page_num)
+        page_chunks = await chunk_model.get_asset_chunks(asset_id=asset_id, page_num=page_num)
         
         
         if len(page_chunks):
@@ -92,6 +102,26 @@ async def index_project(request: Request, project_name: str, push_request: PushR
             "inserted_items_count": inserted_items_count
         }
     )
+
+@nlp_router.get("/index/info/projects")
+async def info_projects(request: Request):
+   
+    nlp_controller = NLPController(
+        vectordb_client=request.app.state.vectordb_client,
+        embedding_client=request.app.state.embedding_client,
+        generation_client=request.app.state.generation_client,
+        template_parser = request.app.state.template_parser
+    )
+
+    collection_info = nlp_controller.list_all_projects()
+
+    return JSONResponse(
+        content={
+            "signal": ResponseSignal.VECTORDB_COLLECTION_RETRIEVED.value,
+            "collection_info":collection_info
+        }
+    )
+
 
 @nlp_router.get("/index/info/{project_name}")
 async def info_project(request: Request, project_name: str):
@@ -140,7 +170,8 @@ async def search_index(request: Request, project_name: str, search_request: Sear
     results = nlp_controller.search_vector_db_collection(
         project=project,
         text=search_request.text,
-        limit=search_request.limit
+        limit=search_request.limit,
+        assets=search_request.assets
     )
     
     if not results:
@@ -178,10 +209,36 @@ async def answer_rag(request: Request, project_name: str, search_request: Search
         template_parser = request.app.state.template_parser
     )
 
+    csv_assets = []
+
+    for idx, asset in enumerate(search_request.assets):
+        if ".csv" in asset:
+            csv_assets.append(asset)
+            search_request.assets.pop(idx)
+
+    data_controller = DataController()
+
+    if len(search_request.assets) == 0:
+        agent_controller = AgentController()
+        agent_controller.create_session()
+        agent_controller.get_session_id()
+        response = agent_controller.run(asset = csv_assets, prompt = search_request.text)
+        if response:
+            agent_response = agent_controller.get_session_info()
+            return JSONResponse(
+                    content={
+                        "signal": ResponseSignal.RAG_ANSWER_SUCCESS.value,
+                        "answer": agent_response.get("text"),
+                        "image_path": agent_response.get("img_path")
+                    }
+                )
+            # return agent_response
+    
     answer, full_prompt, chat_history = nlp_controller.answer_rag_question(
         project=project,
         query=search_request.text,
-        limit=search_request.limit
+        limit=search_request.limit,
+        assets=search_request.assets
     )
 
     if not answer:
