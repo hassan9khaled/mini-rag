@@ -34,13 +34,26 @@ class QdrantDBProvider(VectorDBInterface):
     def list_all_collections(self) -> List:
         return self.client.get_collections()
     
-    def search_by_vector(self, collection_name, vector, limit=5):
+    def search_by_vector(self, collection_name, vector, assets, limit=5):
 
-
+        
         results =  self.client.search(
             collection_name=collection_name,
             query_vector=vector,
-            limit=limit     
+            query_filter=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="metadata.source",
+                        match=models.MatchAny(
+                            any=assets
+                        )
+                    )
+                ]
+
+            ),
+            limit=limit,
+            with_payload=True,
+            with_vectors=True
         )
 
         if not results or len(results) == 0:
@@ -58,7 +71,7 @@ class QdrantDBProvider(VectorDBInterface):
             for result in results
         ]
 
-    def get_collection_info(self, collection_name) -> dict:
+    def get_collection_info(self, collection_name) -> dict:               
         return self.client.get_collection(collection_name=collection_name)
     
     def insert_one(self, collection_name, text, vector, metadata = None, record_id = None):
@@ -94,7 +107,7 @@ class QdrantDBProvider(VectorDBInterface):
             metadata = [None] * len(texts)
         
         if record_ids is None:
-            record_ids = [None] * len(texts)
+            record_ids = list(range(0, len(texts)))
 
         for i in range(0, len(texts), batch_size):
             batch_end = i + batch_size
@@ -113,17 +126,18 @@ class QdrantDBProvider(VectorDBInterface):
 
                 for rec in range(len(batch_texts))
             ]
+            
 
-        try:
-            _ = self.client.upload_records(
-                collection_name=collection_name,
-                records=batch_records
-            )
-        except  Exception as e:
-            self.logger.error(f"Error while inserting batch: {e}")
-            return False
+            try:
+                _ = self.client.upload_records(
+                    collection_name=collection_name,
+                    records=batch_records
+                )
+            except  Exception as e:
+                self.logger.error(f"Error while inserting batch: {e}")
+                return False
 
-        return True
+            return True
 
     def delete_collection(self, collection_name):
         if self.is_collection_exists(collection_name=collection_name):
