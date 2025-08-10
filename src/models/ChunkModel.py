@@ -65,10 +65,10 @@ class ChunkModel(BaseDataModel):
         
         return Data_Chunk(**result)
     
-    async def get_project_chunks(self, project_id: ObjectId, page_num: int=1, page_size: int=100):
+    async def get_asset_chunks(self, asset_id: ObjectId, page_num: int=1, page_size: int=100):
         
         records = await self.collection.find({
-                    "chunk_project_id": project_id
+                    "chunk_asset_id": asset_id
                         }).skip(
                             (page_num - 1) * page_size
                     ).limit(page_size).to_list(length = None)
@@ -100,7 +100,7 @@ class ChunkModel(BaseDataModel):
         """Delete all chunks associated with a specific project ID."""
 
         result = await self.collection.delete_many({
-            "chunk_project_name" : project_id
+            "chunk_project_id" : project_id
         })
 
         return result.deleted_count

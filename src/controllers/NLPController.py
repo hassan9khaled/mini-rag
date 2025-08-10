@@ -2,8 +2,9 @@ from .BaseController import BaseController
 from models.db_schemes import Project, Data_Chunk
 from stores.llm.LLMEnums import DocumentTypeEnum
 from typing import List
-import json
+import json, re
 from helpers.config import get_settings
+from models.db_schemes import RetrievedDocument
 
 class NLPController(BaseController):
     
@@ -73,7 +74,7 @@ class NLPController(BaseController):
 
         return True
     
-    def search_vector_db_collection(self, project: Project, text: str, limit: int = 5):
+    def search_vector_db_collection(self, project: Project, text: str, assets: List[str], limit: int = 5):
         
         # step 1: get the collection name
         collection_name = self.create_collection_name(project_name = project.project_name)
@@ -94,7 +95,8 @@ class NLPController(BaseController):
         results = self.vectordb_client.search_by_vector(
             collection_name=collection_name,
             vector=vector,
-            limit=limit
+            limit=limit,
+            assets=assets
         )
 
         if not results:
@@ -103,7 +105,7 @@ class NLPController(BaseController):
 
         return results
     
-    def answer_rag_question(self, project: Project, query: str, limit: int = 5):
+    def answer_rag_question(self, project: Project, query: str, assets: List[str], limit: int = 5):
 
         if "qwen" in self.settings.GENERATION_MODEL_ID:
             query = "/no_think" + query
@@ -111,19 +113,21 @@ class NLPController(BaseController):
         answer, full_prompt, chat_history = None, None, None
 
         # step 1: retreive related document
-
-        retrieved_documents =  self.search_vector_db_collection(
+        
+        retrieved_documents = self.search_vector_db_collection(
             project=project,
             text=query,
-            limit=limit
+            limit=limit,
+            assets=assets
         )
+        
 
         if not retrieved_documents or len(retrieved_documents) == 0:
 
             return answer, full_prompt, chat_history
         
         # step 2: construct LLM prompt
-
+       
         system_prompt = self.template_parser.get("rag", "system_prompt")
 
         user_query = self.template_parser.get("rag", "user_query", {"query":query})
@@ -135,7 +139,7 @@ class NLPController(BaseController):
                  "chunk_text": doc.text
              })
 
-             for idx, doc in   enumerate(retrieved_documents) 
+             for idx, doc in enumerate(retrieved_documents) 
         ])
 
         footer_prompt = self.template_parser.get("rag", "footer_prompt")
@@ -155,5 +159,14 @@ class NLPController(BaseController):
             chat_history = chat_history
         )
 
+        pattern = r"(?s)<[^>]+>|^\s*$"
+
+        answer = re.sub(pattern, "", answer).strip()
+
         return answer, full_prompt, chat_history
 
+    def list_all_projects(self):
+
+        return json.loads(
+            json.dumps(self.vectordb_client.list_all_collections(), default=lambda x: x.__dict__)
+        )

@@ -7,6 +7,9 @@ class ResponseSignal(Enum):
     FILE_SIZE_EXCEEDED = "file_size_exceeded"
     FILE_UPLOADED_SUCCESS = "file_uploaded_success"
     FILE_UPOLADED_FAILED = "file_uploaded_failed"
+    FILE_IS_EMPTY = "file_is_empty"
+    PROCESSING_CSV_SUCCESS = "processing_csv_success"
+    PROCESSING_CSV_FAILED = "processing_csv_failed"
     PROCESSING_SUCCESS = "processing_success"
     PROCESSING_FAILED = "processing_failed"
     NO_FILES_ERROR = "files_not_found"
@@ -24,5 +27,5 @@ class ResponseSignal(Enum):
     PROCESS_SUCCESS = "process_success"
     PROCESS_FAILED = "process_failed"
     NO_PROJECTS_FOUND = "no_projects_found"
-    RECORDS_EXCEEDED = "you_csv_file_exceed_the_records_limit"
+    RECORDS_EXCEEDED = "your_csv_file_exceed_the_records_limit"
     

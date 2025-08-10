@@ -21,7 +21,6 @@ class ProcessController(BaseController):
 
         self.project_name = project_name
         self.project_path = ProjectController().get_project_path(project_name)
-        self.csv_flag = False
         self.max_records_exceeded = False
         self.csv_file_max_records = get_settings().CSV_FILE_MAX_RECORDS
 
@@ -51,8 +50,7 @@ class ProcessController(BaseController):
             return PyMuPDFLoader(file_path)
 
         if file_ext == ProcessingEnum.CSV.value:
-            self.csv_flag = True
-            return self.csv_file_loader(file_path, limit=self.csv_file_max_records)
+            return CSVLoader(file_path)
         
         return None
 
@@ -63,68 +61,12 @@ class ProcessController(BaseController):
         # Get the file loader
         loader = self.get_file_loader(file_id=file_id)
 
-        if self.csv_flag:
-            return loader
-        
         if loader:
             return loader.load()
 
         return None
     
 
-
-    def csv_file_loader(self, file_path: str, limit: int=1000):
-
-        documents = []
-
-        with open(file_path, mode="r", encoding="utf-8") as csv_file:
-
-            reader = csv.DictReader(csv_file)
-            header = next(reader)  # Read header for reference
-            
-
-            for idx, row in enumerate(reader):
-                
-                if idx >= limit:
-                    self.max_records_exceeded = True
-                    break
-                
-                content = "\n".join(
-                    f"""{k.strip() if k is not None else k}: {
-                        v.strip()
-                        if isinstance(v, str)
-                        else ",".join(map(str.strip, v))
-                        if isinstance(v, list)
-                        else v
-                    }"""
-                    for k, v in row.items()
-                )
-                
-                # Join all columns as a single text block
-                row_content = "".join(content) + ". "
-                
-                documents.append(
-                    Document(
-                        page_content=row_content,
-                        metadata={
-                            "row": idx + 1,
-                            "source": os.path.join(self.project_path, os.path.basename(file_path))
-                        }
-                    )
-                )
-        return documents
-
-
-    def normalize_text(self, text):
-
-        text = text.strip()
-        text = text.lower()  # for English
-        text = re.sub(r'[ًٌٍَُِّْـ]', '', text)  # remove Arabic diacritics
-        text = re.sub(r'[إأآا]', 'ا', text)
-        text = re.sub(r'ة', 'ه', text)
-        text = re.sub(r'ى', 'ي', text)
-
-        return text
     
 
     def process_file_content(self, file_content: list, file_id: str,
@@ -140,12 +82,13 @@ class ProcessController(BaseController):
             length_function=len,
         )
 
-        csv_flag = self.get_file_extension(file_id=file_id)
+
 
         file_content_texts = [
-            self.normalize_text(rec.page_content.replace("\n", ". ") if csv_flag else rec.page_content)
+            rec.page_content
             for rec in file_content
         ]
+
 
         file_content_metadata = [
             rec.metadata

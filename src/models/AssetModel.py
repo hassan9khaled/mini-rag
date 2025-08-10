@@ -44,10 +44,10 @@ class AssetModel(BaseDataModel):
 
         return asset
     
-    async def get_all_project_assets(self, asset_project_name: str, asset_type: str):
+    async def get_all_project_assets(self, asset_project_id: str, asset_type: str):
         """Retrieves all assets for a given project and asset type."""
         records = await self.collection.find({
-            "asset_project_name": ObjectId(asset_project_name) if isinstance(asset_project_name, str) else asset_project_name,
+            "asset_project_id": ObjectId(asset_project_id) if isinstance(asset_project_id, str) else asset_project_id,
             "asset_type": asset_type
         }).to_list(length=None)
 
@@ -56,12 +56,12 @@ class AssetModel(BaseDataModel):
             for record in records
         ]
     
-    async def get_asset_record(self, asset_project_name: str, asset_name: str):
+    async def get_asset_record(self, asset_project_id: str, asset_name: str):
         """Retrieves a specific asset record by project ID and asset name."""
 
         # Find the asset record in the collection
         record = await self.collection.find_one({
-            "asset_project_name": ObjectId(asset_project_name) if isinstance(asset_project_name, str) else asset_project_name,
+            "asset_project_id": ObjectId(asset_project_id),
             "asset_name": asset_name,            
         })
 
@@ -75,7 +75,7 @@ class AssetModel(BaseDataModel):
         """Delete all chunks associated with a specific project ID."""
 
         result = await self.collection.delete_many({
-            "asset_project_name" : project_id
+            "asset_project_id" : project_id
         })
 
         return result.deleted_count

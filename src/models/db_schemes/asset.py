@@ -8,11 +8,12 @@ class Asset(BaseModel):
     """Asset Scheme representing a file or resource in a project."""
 
     id: Optional[ObjectId] = Field(None, alias="_id")
-    asset_project_name: ObjectId
+    asset_project_id: ObjectId
     asset_type: str = Field(..., min_length=1)
     asset_name: str = Field(..., min_length=1)
     asset_size: int = Field(ge=0, default=None)
     asset_config: dict = Field(default=None)
+    source: str = Field(..., min_length=1)
     created_at: datetime = Field(default=datetime.now(timezone.utc))
 
     class Config:
@@ -27,17 +28,17 @@ class Asset(BaseModel):
         return [
             {
                 "key": [
-                    ("asset_project_name", 1)
+                    ("asset_project_id", 1)
                 ],
-                "name": "asset_project_name_index_1",
+                "name": "asset_project_id_index_1",
                 "unique": False
             },
             {
                 "key": [
-                    ("asset_project_name", 1),
+                    ("asset_project_id", 1),
                     ("asset_name", 1)
                 ],
-                "name": "asset_project_name_name_index_1",
+                "name": "asset_project_id_name_index_1",
                 "unique": True
             }
         ]
