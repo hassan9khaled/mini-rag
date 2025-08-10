@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile, status, Request
 from fastapi.responses import JSONResponse
-import os
+import os, re, time
 from helpers.config import get_settings, Settings
 from controllers import DataController, ProjectController, ProcessController
 from models import ResponseSignal
@@ -86,6 +86,7 @@ async def upload_data(request: Request, project_name: str, file: UploadFile,
         original_file_name=file.filename,
         project_name=project_name
     )
+    
 
     # Save the file to the server
     try:
@@ -99,25 +100,41 @@ async def upload_data(request: Request, project_name: str, file: UploadFile,
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"signal": ResponseSignal.FILE_UPOLADED_FAILED.value}
         )
+    num_of_records = 0
+    csv_signal = False
+    accepted_signals = [ResponseSignal.PROCESSING_CSV_SUCCESS.value, ResponseSignal.RECORDS_EXCEEDED.value]
+    
+    if ".csv" in file_path:
+        file_path, num_of_records, csv_signal = data_controller.validate_csv_file(file_path=file_path)
+        if csv_signal not in accepted_signals:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={
+                    "signal": csv_signal
+                }
+            )
 
     # Create an asset record in the database
     asset_model = await AssetModel.create_instance(
         db_client=request.app.state.db_client
     )
     asset_resource = Asset(
-        asset_project_name=project.id,
+        asset_project_id=project.id,
         asset_type=AssetModelEnum.FILE.value,
         asset_name=file_id,
         asset_size=os.path.getsize(file_path),
-        created_at=datetime.now(timezone.utc)
-    ) # type: ignore
+        source=file_path,
+        created_at=datetime.now(timezone.utc),
+    ) 
     asset_record = await asset_model.create_asset(asset=asset_resource)
-
+    
     return JSONResponse(
         content={
             "signal": ResponseSignal.FILE_UPLOADED_SUCCESS.value,
             "asset_id": str(asset_record.id),
-            "file_id_name": file_id,
+            "file_name": file_id,
+            "csv_signal": csv_signal,
+            "num_of_records": num_of_records
         }
     )
 
@@ -155,9 +172,11 @@ async def process(request: Request, project_name: str, process_request: ProcessR
         db_client=request.app.state.db_client
     )
     project_files_ids = {}
+
     if process_request.file_id:
+
         asset_record = await asset_model.get_asset_record(
-            asset_project_name=project.id,
+            asset_project_id=project.id,
             asset_name=process_request.file_id
         )
         if asset_record is None:
@@ -166,9 +185,10 @@ async def process(request: Request, project_name: str, process_request: ProcessR
                 content={"signal": ResponseSignal.FILE_ID_ERROR.value}
             )
         project_files_ids = {asset_record.id: asset_record.asset_name}
+
     else:
         project_files = await asset_model.get_all_project_assets(
-            asset_project_name=project.id,
+            asset_project_id=project.id,
             asset_type=AssetModelEnum.FILE.value,
         )
         project_files_ids = {record.id: record.asset_name for record in project_files}
@@ -191,7 +211,12 @@ async def process(request: Request, project_name: str, process_request: ProcessR
         await chunk_model.delete_chunks_by_project_name(project_id=project.id)
 
     for asset_id, file_id in project_files_ids.items():
+        
+        if ".csv" in file_id:
+            continue
+        
         file_content = process_controller.get_file_content(file_id=file_id)
+
         if file_content is None:
             logger.error(f"Error while processing file: {file_id}")
             continue
@@ -214,7 +239,7 @@ async def process(request: Request, project_name: str, process_request: ProcessR
                 chunk_metadata=chunk.metadata,
                 chunk_project_id=project.id,
                 chunk_asset_id=asset_id
-            ) # type: ignore
+            )
             for i, chunk in enumerate(file_chunks)
         ]
 
@@ -223,7 +248,7 @@ async def process(request: Request, project_name: str, process_request: ProcessR
 
     return JSONResponse(
         content={
-            "signal": ResponseSignal.PROCESSING_SUCCESS.value if not records_signal else ResponseSignal.RECORDS_EXCEEDED.value,
+            "signal": ResponseSignal.PROCESSING_SUCCESS.value,
             "inserted_chunks": num_records,
             "processed_files": num_files
         }
@@ -278,8 +303,9 @@ async def delete_project(request: Request, project_request: ProjectRequest):
 
         request.app.state.vectordb_client.delete_collection(f"collection_{project_request.project_name}")
 
-        await asset_model.delete_assets_by_project_name(project.id)
-        await chunk_model.delete_chunks_by_project_name(project.id)
+        _ = await asset_model.delete_assets_by_project_name(project.id)
+        
+        _ = await chunk_model.delete_chunks_by_project_name(project.id)
 
         _ = ProjectController().delete_project(project_name=project_request.project_name)
         await project_model.delete_project(project_name=project_request.project_name)
@@ -298,8 +324,39 @@ async def delete_project(request: Request, project_request: ProjectRequest):
         }
     )
 
+@data_router.post("/projects/assets")
+async def fetch_assets(request: Request, project_request: ProjectRequest):
+    project_model = await ProjectModel.create_instance(
+        db_client=request.app.state.db_client
+    )
+    project = await project_model.get_project_or_create_one(
+        project_name=project_request.project_name
+    )
+
+    # Get the files to process
+    asset_model = await AssetModel.create_instance(
+        db_client=request.app.state.db_client
+    )    
+    project_files = await asset_model.get_all_project_assets(
+    asset_project_id=project.id,
+    asset_type=AssetModelEnum.FILE.value,
+    )
+    assets = []
+    for file in project_files:
+        assets.append({
+            "asset_full_name": file.asset_name,
+            "asset_name": re.findall(r"_([^.]+\.[^.]+)", file.asset_name)[0],
+            "asset_project_id": str(file.asset_project_id),
+            "asset_id": str(file.id),
+            "asset_size": file.asset_size,
+            "asset_path": file.source
+        })
+    
+    return JSONResponse(
+        content=assets
+    )
 @data_router.get("/projects/rename")
-async def list_all_projects(request: Request, project_request: ProjectRequest):
+async def rename_project(request: Request, project_request: ProjectRequest):
     # Get or create the project
     project_model = await ProjectModel.create_instance(
         db_client=request.app.state.db_client
