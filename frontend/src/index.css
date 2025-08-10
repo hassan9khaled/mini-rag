@@ -1,0 +1,16 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Prevent body scrolling */
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* A CSS class for the resources container */
+.resources-container {
+  height: 100%; /* Or a fixed height */
+  overflow-y: auto; /* Adds a vertical scrollbar if content overflows */
+  /* Other styling like border, background, etc. */
+}
