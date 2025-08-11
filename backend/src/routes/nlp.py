@@ -8,7 +8,7 @@ from controllers import AgentController
 from models import ResponseSignal
 from models.AssetModel import AssetModel
 from controllers import DataController
-
+import os
 import logging
 
 logger = logging.getLogger("uvicorn.error")
@@ -220,16 +220,20 @@ async def answer_rag(request: Request, project_name: str, search_request: Search
 
     if len(search_request.assets) == 0:
         agent_controller = AgentController()
-        agent_controller.create_session()
         agent_controller.get_session_id()
         response = agent_controller.run(asset = csv_assets, prompt = search_request.text)
         if response:
             agent_response = agent_controller.get_session_info()
+            img_path = agent_response.get("img_path")
+            if img_path:
+                
+                img_path = "/imgs/" + img_path
+                
             return JSONResponse(
                     content={
                         "signal": ResponseSignal.RAG_ANSWER_SUCCESS.value,
                         "answer": agent_response.get("text"),
-                        "image_path": agent_response.get("img_path")
+                        "image_path": img_path
                     }
                 )
             # return agent_response

@@ -37,31 +37,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   return (
     <div className="flex-1 flex flex-col bg-gray-50 h-full">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 p-6">
-        <div className="flex items-center space-x-3 mb-1">
-          <div className="p-1 bg-blue-100 rounded-lg">
-            <Sparkles className="w-4 h-4 text-blue-600" />
-          </div>
-          <h1 className="text-xl font-semibold text-gray-900">Chat</h1>
-        </div>
-        
-        {selectedDocuments.length > 0 && (
-          <div className="mt-1">
-            <h3 className="text-sm font-medium text-gray-700 mb-1">Selected documents:</h3>
-            <div className="flex flex-wrap gap-1">
-              {selectedDocuments.map((doc) => (
-                <span
-                  key={doc.id}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
-                >
-                  <FileText className="w-3 h-3 mr-1" />
-                  {doc.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      
 
       {/* Messages */}
       <div className="flex-1 overflow-y-scroll p-6">

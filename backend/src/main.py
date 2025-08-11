@@ -7,6 +7,8 @@ from stores.llm.LLMProviderFactory import LLMProviderFactory
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
 from stores.llm.templates.template_parser import TemplateParser
 from fastapi.middleware.cors import CORSMiddleware
+from controllers import AgentController
+
 origins = [
     "http://localhost",
     "http://localhost:8080", # Example if your frontend runs on 8080
@@ -56,7 +58,11 @@ async def lifespan(app: FastAPI):
         language=settings.PRIMARY_LANG,
         default_language=settings.DEFAULT_LANG
     )
-    
+
+    # # Create Session for adk agent
+    # app.state.agent_controller = AgentController()
+    # app.state.agent_controller.create_session("session_001")
+    # print(f"\x1b[36mSession created successfully!\033[0m")
     yield  # This separates startup from shutdown code
     
     # Shutdown code

@@ -10,15 +10,17 @@ class AgentController(BaseController):
     def __init__(self):
         super().__init__()
 
-        self.app_name = "software_team"
-        self.session_id = "session_001"
+        self.app_name = "data_analysis_agent"
+        self.session_id = "session"
         self.user_id = "user"
         self.base_url = "http://localhost:8000"
 
-    def create_session(self):
+    def create_session(self, session_id: str = None):
         
-        res = requests.post(f'{self.base_url}/apps/{self.app_name}/users/{self.app_name}/sessions/{self.session_id}')
+        new_session = requests.post(f'{self.base_url}/apps/{self.app_name}/users/{self.app_name}/sessions/{self.session_id}')
 
+        return new_session.status_code
+    
     def run(self, asset, prompt):
 
         url = f"{self.base_url}/run"
@@ -28,7 +30,7 @@ class AgentController(BaseController):
         }
 
         data = {
-            "app_name": "software_team",
+            "app_name": self.app_name,
             "user_id": self.user_id,
             "session_id": self.session_id,
             "new_message": {
@@ -62,7 +64,7 @@ class AgentController(BaseController):
         sessions_url = f"{self.base_url}/apps/{self.app_name}/users/{self.user_id}/sessions"
         sessions_response = requests.get(sessions_url)
         session_id = sessions_response.json()[0].get("id")
-
+        print(session_id)
         self.session_id = session_id
 
         return True
