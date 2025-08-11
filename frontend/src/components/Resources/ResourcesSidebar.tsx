@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Search, Upload, Filter, FileText, X, Check, Loader, AlertCircle } from 'lucide-react';
 import { Document } from '../../types';
+import toast from 'react-hot-toast';
 
 interface ResourcesSidebarProps {
   documents: Document[];
@@ -108,8 +109,7 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
       }
       if (uploadData.csv_signal == 'you_csv_file_exceed_the_records_limit')
         setUploadStatus('Your file has excedded the limit of records only' + uploadData.num_of_records + "will be used");
-      setUploadStatus('File uploaded successfully!');
-      setUploadStatus('File uploaded successfully!');
+      toast.success(`File uploaded successfully!`);
 
       // Start processing
       const fileIdName = uploadData.file_name;
@@ -148,10 +148,10 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
           delete updated[fileIdName];
           return updated;
         });
-        setUploadStatus('File processed and pushed successfully!');
+        toast.success(`File processed and pushed successfully!`);
         if (fetchDocuments) fetchDocuments(selectedProject);
       } else {
-        setUploadStatus('File uploaded but processing failed.');
+        toast.error(`Failed process file.`);
       }
     } catch (err) {
       setUploadStatus('Failed to upload or process file.');
@@ -161,7 +161,7 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
 
   return (
     <div className="bg-white border-l border-gray-200 flex flex-col flex-1 h-full">
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-2 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <h2 className="text-xl font-semibold text-gray-900">Resources</h2>

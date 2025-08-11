@@ -134,7 +134,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t border-gray-200 p-6">
+      <div className="bg-white border-t border-gray-200 p-4">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="relative">
             <input

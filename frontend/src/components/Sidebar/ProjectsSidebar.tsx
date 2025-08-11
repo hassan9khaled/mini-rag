@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Plus, Star, FileText, Calendar, Trash } from 'lucide-react';
 import { Project } from '../../types';
 import { CreateProjectModal } from '../Projects/CreateProjectModal';
+import toast from 'react-hot-toast';
 
 interface ProjectsSidebarProps {
   projects: Project[];
@@ -54,17 +55,19 @@ export const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
 
   const handleCreate = (projectName: string) => {
     onCreateProject(projectName);
+    toast.success(`Project "${projectName}" created successfully`);
     setIsModalOpen(false);
   };
 
   const handleDelete = (e: React.MouseEvent, projectId: string) => {
     e.stopPropagation(); // Prevent selecting the project when deleting
     onDeleteProject(projectId);
+    toast.success(`Project "${projectId}" deleted successfully`);
   };
 
   return (
     <div className="bg-white border-r border-gray-200 flex flex-col flex-1 h-full">
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-2 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900">Projects</h2>
           <button

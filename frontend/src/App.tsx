@@ -6,6 +6,7 @@ import { ResourcesSidebar } from './components/Resources/ResourcesSidebar';
 import { useRAGSystem } from './hooks/useRAGSystem';
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const {
@@ -55,6 +56,7 @@ function App() {
               onCreateProject={onCreateProject}
               onDeleteProject={onDeleteProject}
             />
+            <Toaster position="top-center" />
           </Panel>
           <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-gray-300 transition-colors cursor-ew-resize" />
           <Panel defaultSize={60} minSize={30}>
@@ -86,8 +88,10 @@ function App() {
                 onSearchChange={setDocumentSearchTerm}
                 selectedProject={selectedProject}
                 fetchDocuments={fetchDocuments}
-              />
-            )}
+                />
+              )
+            }
+            <Toaster position="top-center" />
           </Panel>
         </PanelGroup>
       </ErrorBoundary>
