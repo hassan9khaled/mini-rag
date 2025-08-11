@@ -16,7 +16,7 @@ class DataController(BaseController):
     
     def validate_csv_file(self, file_path: str):
         destination_path = file_path[:-4] + "_processed" + ".csv"
-        print(destination_path)
+        
         try:
             # Open the input file in text mode, and the output file for writing
             # newline='' is crucial for the csv module to handle line endings correctly

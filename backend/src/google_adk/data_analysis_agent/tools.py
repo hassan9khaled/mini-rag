@@ -39,18 +39,18 @@ def write_file(content: str) -> bool:
             # It's good practice to get the name if you intend for it to persist
             # and potentially be used later.
             file_path = temp_file.name
-            print(f"Temporary .py file created at: {file_path}")
+            
 
         return file_path
     
     except IOError as e:
         # Catch I/O errors that might occur during file operations
-        print(f"Error writing to temporary file: {e}")
+        
         return False
     
     except Exception as e:
         # Catch any other unexpected errors
-        print(f"An unexpected error occurred: {e}")
+        
         return False
 def register_output_file(path: str) -> str:
     file_name = os.path.split(path)[-1]   

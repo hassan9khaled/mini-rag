@@ -12,8 +12,8 @@ class Project(BaseModel):
 
     @field_validator('project_name')
     def validate_project_name(cls, value):
-        if not value.isalnum():
-            raise ValueError("project_name must be alphanumeric")
+        if not value:
+            raise ValueError("project_name is not correct")
         
         return value
     

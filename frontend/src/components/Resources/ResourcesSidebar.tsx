@@ -26,7 +26,9 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [processingFiles, setProcessingFiles] = useState<{ [fileId: string]: boolean }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [showFilters, setShowFilters] = useState(false);
+  const [fileTypeFilter, setFileTypeFilter] = useState<string | null>(null);
+  const documentTypes = Array.from(new Set(documents.map(doc => doc.type)));
   const getFileIcon = (type: string) => {
     return <FileText className="w-4 h-4" />;
   };
@@ -60,9 +62,10 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
     }
   };
 
-  const filteredDocuments = documents.filter((doc) =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+const filteredDocuments = documents
+  .filter(doc => doc.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  .filter(doc => !fileTypeFilter || doc.type === fileTypeFilter);
+
 
   const selectedCount = selectedDocuments.length;
 
@@ -172,7 +175,9 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
             )}
           </div>
           <div className="flex items-center space-x-2">
-            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            onClick={() => setShowFilters(prev => !prev)}>
+              
               <Filter className="w-4 h-4" />
             </button>
             <button
@@ -201,7 +206,23 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
+        {showFilters && (
+      <div className="mt-2 flex space-x-2">
+        {documentTypes.map(type => (
+          <button
+            key={type}
+            className={`px-3 py-1 rounded-xl border ${
+              fileTypeFilter === type ? 'bg-blue-500 text-white' : 'bg-gray-100'
+            }`}
+            onClick={() => setFileTypeFilter(fileTypeFilter === type ? null : type)}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
+    )}
 
+                    
         {uploadStatus && (
           <div className="mt-2 text-xs text-center text-green-600">{uploadStatus}</div>
         )}
@@ -209,7 +230,7 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
 
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-3 mb-6">
-          {documents.map((document) => (
+          {filteredDocuments.filter(doc => !fileTypeFilter || doc.type === fileTypeFilter).map((document) => (
             <div
               key={document.id}
               onClick={() => onDocumentSelect(document.id)}
@@ -232,7 +253,7 @@ export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
               </div>
 
               <div className="flex items-center justify-between mb-2">
-                <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded border">
+                <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-xl border">
                   {document.type}
                 </span>
                 <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs border ${getStatusColor(document.status)}`}>

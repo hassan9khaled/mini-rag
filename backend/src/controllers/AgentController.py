@@ -64,7 +64,6 @@ class AgentController(BaseController):
         sessions_url = f"{self.base_url}/apps/{self.app_name}/users/{self.user_id}/sessions"
         sessions_response = requests.get(sessions_url)
         session_id = sessions_response.json()[0].get("id")
-        print(session_id)
         self.session_id = session_id
 
         return True
