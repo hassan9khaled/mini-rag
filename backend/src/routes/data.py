@@ -218,8 +218,10 @@ async def process(request: Request, project_name: str, process_request: ProcessR
         file_content = process_controller.get_file_content(file_id=file_id)
 
         if file_content is None:
-            logger.error(f"Error while processing file: {file_id}")
-            continue
+            logger.error(f"Error while processing file content: {file_id}")
+            return JSONResponse(
+                content={"signal": ResponseSignal.PROCESSING_FAILED.value}
+            )
 
         file_chunks, records_signal = process_controller.process_file_content(
             file_content=file_content,
@@ -228,6 +230,7 @@ async def process(request: Request, project_name: str, process_request: ProcessR
             overlap_size=overlap_size
         )
         if not file_chunks:
+            logger.error("Failed to chunk the file")
             return JSONResponse(
                 content={"signal": ResponseSignal.PROCESSING_FAILED.value}
             )

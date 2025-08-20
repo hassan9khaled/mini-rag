@@ -211,12 +211,11 @@ async def answer_rag(request: Request, project_name: str, search_request: Search
 
     csv_assets = []
 
-    for idx, asset in enumerate(search_request.assets):
+    for asset in search_request.assets:
         if ".csv" in asset:
             csv_assets.append(asset)
-            search_request.assets.pop(idx)
 
-    data_controller = DataController()
+    search_request.assets = list(set(search_request.assets) - set(csv_assets))
 
     if len(search_request.assets) == 0:
         agent_controller = AgentController()
@@ -236,8 +235,7 @@ async def answer_rag(request: Request, project_name: str, search_request: Search
                         "image_path": img_path
                     }
                 )
-            # return agent_response
-    
+  
     answer, full_prompt, chat_history = nlp_controller.answer_rag_question(
         project=project,
         query=search_request.text,
