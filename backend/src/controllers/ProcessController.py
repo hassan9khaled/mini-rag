@@ -2,16 +2,13 @@ from .BaseController import BaseController
 from .ProjectController import ProjectController
 from helpers.config import get_settings
 
-from langchain_community.document_loaders import TextLoader, PyMuPDFLoader
+from langchain_community.document_loaders import TextLoader, PyMuPDFLoader, PythonLoader
 from langchain_community.document_loaders.csv_loader import CSVLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter, PythonCodeTextSplitter
 
 from models import ProcessingEnum
 
 import os
-import re
-import csv
 
 
 class ProcessController(BaseController):
@@ -23,6 +20,7 @@ class ProcessController(BaseController):
         self.project_path = ProjectController().get_project_path(project_name)
         self.max_records_exceeded = False
         self.csv_file_max_records = get_settings().CSV_FILE_MAX_RECORDS
+        self.python_flag = False
 
     def get_file_extension(self, file_id: str):
         """Returns the file extension of the given file ID."""
@@ -52,6 +50,10 @@ class ProcessController(BaseController):
         if file_ext == ProcessingEnum.CSV.value:
             return CSVLoader(file_path)
         
+        if file_ext == ProcessingEnum.PY.value:
+            self.python_flag = True
+            return PythonLoader(file_path)
+        
         return None
 
     
@@ -74,7 +76,13 @@ class ProcessController(BaseController):
         
         """Processes the file content by splitting it into chunks."""
         
-        
+        if self.python_flag:
+            text_splitter = PythonCodeTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=overlap_size,
+                length_function=len,
+            )
+
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=overlap_size,
