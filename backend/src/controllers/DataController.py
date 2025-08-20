@@ -59,6 +59,8 @@ class DataController(BaseController):
     def validate_uploaded_file(self, file: UploadFile):
         """Validates the uploaded file based on its type and size."""
 
+        print(file.content_type)
+
         if file.content_type not in self.app_settings.FILE_ALLOWED_TYPES:
             return False, ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value
 

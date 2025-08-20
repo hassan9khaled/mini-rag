@@ -17,8 +17,8 @@ class AgentController(BaseController):
 
     def create_session(self, session_id: str = None):
         
-        new_session = requests.post(f'{self.base_url}/apps/{self.app_name}/users/{self.app_name}/sessions/{self.session_id}')
-
+        new_session = requests.post(f'{self.base_url}/apps/{self.app_name}/users/{self.app_name}/sessions/ddd')
+        self.session_id = session_id
         return new_session.status_code
     
     def run(self, asset, prompt):

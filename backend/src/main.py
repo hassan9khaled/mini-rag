@@ -59,10 +59,7 @@ async def lifespan(app: FastAPI):
         default_language=settings.DEFAULT_LANG
     )
 
-    # # Create Session for adk agent
-    # app.state.agent_controller = AgentController()
-    # app.state.agent_controller.create_session("session_001")
-    # print(f"\x1b[36mSession created successfully!\033[0m")
+
     yield  # This separates startup from shutdown code
     
     # Shutdown code

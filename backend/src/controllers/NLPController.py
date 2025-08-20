@@ -4,7 +4,9 @@ from stores.llm.LLMEnums import DocumentTypeEnum
 from typing import List
 import json, re
 from helpers.config import get_settings
-from models.db_schemes import RetrievedDocument
+import logging
+
+logger = logging.getLogger('uvicorn.error')
 
 class NLPController(BaseController):
     
@@ -84,23 +86,28 @@ class NLPController(BaseController):
             text = text,
             document_type=DocumentTypeEnum.QUERY.value
         )
-
+        
         if not vector or len(vector) == 0:
             return False
         
 
 
         # step 3: do semantic search
+        try:
+            results = self.vectordb_client.search_by_vector(
+                collection_name=collection_name,
+                vector=vector,
+                limit=limit,
+                assets=assets
+            )
 
-        results = self.vectordb_client.search_by_vector(
-            collection_name=collection_name,
-            vector=vector,
-            limit=limit,
-            assets=assets
-        )
+        except ValueError:
+            logger.error(f"No Collection found with name: {collection_name}")
+            return False
 
+        
         if not results:
-
+            
             return False
 
         return results
@@ -121,7 +128,7 @@ class NLPController(BaseController):
             assets=assets
         )
         
-
+        
         if not retrieved_documents or len(retrieved_documents) == 0:
 
             return answer, full_prompt, chat_history
@@ -160,7 +167,7 @@ class NLPController(BaseController):
         )
 
         pattern = r"(?s)<[^>]+>|^\s*$"
-
+        
         answer = re.sub(pattern, "", answer).strip()
 
         return answer, full_prompt, chat_history
