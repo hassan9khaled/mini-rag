@@ -60,7 +60,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                         src={imgPath}
                         alt="AI Response"
                         className="my-2 rounded shadow"
-                        style={{ maxWidth: '100%' }}
+                        style={{ maxWidth: '70%' }}
                       />
                     </div>
                   </div>

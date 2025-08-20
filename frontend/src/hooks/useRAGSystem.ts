@@ -29,6 +29,7 @@ export const useRAGSystem = () => {
   // --- Clean chat only on reload ---
   useEffect(() => {
     if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+      
       if (selectedProject) {
         localStorage.removeItem(`chat_history_${selectedProject}`);
         setMessages([]);
@@ -46,6 +47,7 @@ export const useRAGSystem = () => {
       setProjects(mappedProjects);
       if (mappedProjects.length > 0 && !selectedProject) {
         setSelectedProject(mappedProjects[0].id);
+        
       }
     } catch (error) {
       console.error("Error fetching projects:", error);

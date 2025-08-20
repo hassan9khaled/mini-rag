@@ -12,7 +12,7 @@ interface ResourcesSidebarProps {
   selectedProject?: string | null;
   fetchDocuments?: (projectName: string) => void;
 }
-
+const API_BASE_URL = "http://localhost:5000";
 export const ResourcesSidebar: React.FC<ResourcesSidebarProps> = ({
   documents,
   selectedDocuments,
@@ -157,7 +157,7 @@ const filteredDocuments = documents
         toast.error(`Failed process file.`);
       }
     } catch (err) {
-      setUploadStatus('Failed to upload or process file.');
+      toast.error("Failed to upload the file.")
     }
     setTimeout(() => setUploadStatus(null), 3000);
   };
