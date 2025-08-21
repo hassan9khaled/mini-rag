@@ -1,0 +1,19 @@
+fastapi==0.116.1
+uvicorn[standard]==0.34.0
+python-multipart==0.0.9
+python-dotenv==1.0.1
+pydantic-settings==2.2.1
+pydantic==2.9
+aiofiles==23.2.1
+langchain==0.1.20
+PyMuPDF==1.24.3
+motor>=3.6
+pydantic-mongo==2.3.0
+PyMongo >=4.9
+openai==1.55.3 
+ollama==0.5.1
+cohere==5.5.4
+qdrant-client==1.12.1
+google-adk==1.8.0
+pandas==2.3.1
+aiohttp==3.12.15
