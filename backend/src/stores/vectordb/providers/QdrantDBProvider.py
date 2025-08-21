@@ -66,7 +66,6 @@ class QdrantDBProvider(VectorDBInterface):
                 "text": result.payload["text"],
                 "id": result.id,
                 "source": result.payload["metadata"]["source"],
-                # "page": result.payload["metadata"]["page"]
             })
 
             for result in results

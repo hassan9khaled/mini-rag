@@ -79,6 +79,13 @@ app.add_middleware(
     allow_headers=["*"],    # Allows all headers in the request
 )
 
+# The root route
+@app.get("/")
+
+async def root():
+
+    return "mini-rag is running..."
+
 # Include your routers
 app.include_router(base.base_router)
 app.include_router(data.data_router)

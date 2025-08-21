@@ -166,7 +166,7 @@ async def search_index(request: Request, project_name: str, search_request: Sear
         generation_client=request.app.state.generation_client,
         template_parser = request.app.state.template_parser
     )
-
+    print(search_request.assets)
     results = nlp_controller.search_vector_db_collection(
         project=project,
         text=search_request.text,

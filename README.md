@@ -4,7 +4,8 @@ This is a minimal implementation of The RAG model for question answering.
 
 ## Requirements
 
-- Python 3.8 or later
+- Python 3.9 or later
+- pip < 24.1
 
 ### Install python using MiniConda
 
@@ -30,6 +31,7 @@ export PS1="\[\033[01;32m\]\u@\h:\w\n\[\033[00m\]\$ "
 ### Install the required packages
 
 ```bash
+$ cd backend/src
 $ pip install -r requirements.txt
 ```
 
@@ -40,6 +42,7 @@ Follow the official instructions for your OS:
 - [Get Docker](https://docs.docker.com/get-docker/)
 
 ## Run Docker Compose Services
+### MongoDB
 
 ```bash
 $ cd docker
@@ -62,6 +65,13 @@ $ docker run -d -p 27007:27017 --name mongodb mongo:7-jammy
 ```
 
 This will run MongoDB on `localhost:27007`.
+
+### (optional) FrontEnd
+
+```bash
+$ cd frontend
+$ docker run -d -p 5173:5173 --name frontend-1 mini-rag-app-frontend
+```
 
 ### (Optional) Install Studio 3T
 

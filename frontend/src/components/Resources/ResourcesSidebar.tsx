@@ -127,7 +127,7 @@ const filteredDocuments = documents
             file_id: fileIdName,
             chunk_size: 200,
             overlap_size: 30,
-            do_reset: 1,
+            do_reset: 0,
           }),
         }
       );
@@ -142,7 +142,7 @@ const filteredDocuments = documents
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               asset_name: fileIdName,
-              do_reset: 1,
+              do_reset: 0,
             }),
           }
         );

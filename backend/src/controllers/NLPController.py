@@ -101,7 +101,8 @@ class NLPController(BaseController):
                 assets=assets
             )
 
-        except ValueError:
+        except ValueError as e:
+            print(e)
             logger.error(f"No Collection found with name: {collection_name}")
             return False
 
